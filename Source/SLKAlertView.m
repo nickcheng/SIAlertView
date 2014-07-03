@@ -173,7 +173,7 @@ static SLKAlertView *__si_alert_current_view;
 @interface SLKAlertItem : NSObject
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, assign) SLKAlertViewButtonType type;
-@property (nonatomic, copy) SLKAlertViewHandler action;
+@property (nonatomic, copy) SLKAlertViewBlock action;
 @end
 
 @implementation SLKAlertItem
@@ -300,12 +300,12 @@ static SLKAlertView *__si_alert_current_view;
 	return self;
 }
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewHandler)cancelled
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewBlock)cancelled
 {
     return [self showWithTitle:title message:message acceptButtonTitle:nil cancelButtonTitle:cancelTitle didAccept:NULL didCancel:cancelled];
 }
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewHandler)accepted didCancel:(SLKAlertViewHandler)cancelled
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewBlock)accepted didCancel:(SLKAlertViewBlock)cancelled
 {
     SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title message:message];
     if (alert) {
@@ -496,7 +496,7 @@ static SLKAlertView *__si_alert_current_view;
     [self invalidateLayout];
 }
 
-- (void)addButtonWithTitle:(NSString *)title type:(SLKAlertViewButtonType)type handler:(SLKAlertViewHandler)handler
+- (void)addButtonWithTitle:(NSString *)title type:(SLKAlertViewButtonType)type handler:(SLKAlertViewBlock)handler
 {
     SLKAlertItem *item = [[SLKAlertItem alloc] init];
 	item.title = title;

@@ -35,7 +35,7 @@ typedef NS_ENUM(NSInteger, SLKAlertViewTransitionStyle) {
 
 @class SLKAlertView;
 
-typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
+typedef void(^SLKAlertViewBlock)(SLKAlertView *alertView);
 
 @interface SLKAlertView : UIView
 
@@ -43,7 +43,7 @@ typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
 @property (nonatomic, copy) NSString *title;
 /** The alert message */
 @property (nonatomic, copy) NSString *message;
-/** The alert background color. Default is #FFFFFF */
+/** The alert background color. Default is white. */
 @property (nonatomic, strong) UIColor *viewBackgroundColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
 /** The alert title color. Default is #3C4B5B */
 @property (nonatomic, strong) UIColor *titleColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
@@ -70,13 +70,13 @@ typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
 @property (nonatomic, assign) SLKAlertViewBackgroundStyle backgroundStyle;
 
 /** A block object triggered when the alert will be shown. */
-@property (nonatomic, copy) SLKAlertViewHandler willShowHandler;
+@property (nonatomic, copy) SLKAlertViewBlock willShowHandler;
 /** A block object triggered when the alert did shown. */
-@property (nonatomic, copy) SLKAlertViewHandler didShowHandler;
+@property (nonatomic, copy) SLKAlertViewBlock didShowHandler;
 /** A block object triggered when the alert will be dismissed. */
-@property (nonatomic, copy) SLKAlertViewHandler willDismissHandler;
+@property (nonatomic, copy) SLKAlertViewBlock willDismissHandler;
 /** A block object triggered when the alert was dismissed. */
-@property (nonatomic, copy) SLKAlertViewHandler didDismissHandler;
+@property (nonatomic, copy) SLKAlertViewBlock didDismissHandler;
 
 /** YES if the alert is visible */
 @property (nonatomic, readonly, getter = isVisible) BOOL visible;
@@ -101,7 +101,7 @@ typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
  @paran cancelled A block object to be triggered when the button is tapped.
  @returns The newly initialized alert view.
  */
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewHandler)cancelled;
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewBlock)cancelled;
 
 /**
  Convenience method for initializing an alert view.
@@ -113,7 +113,7 @@ typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
  @paran didAccept A block object to be triggered when the button is tapped.
  @paran cancelled A block object to be triggered when the button is tapped.
  */
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewHandler)accepted didCancel:(SLKAlertViewHandler)cancelled;
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewBlock)accepted didCancel:(SLKAlertViewBlock)cancelled;
 
 /**
  Displays the receiver using animation.
