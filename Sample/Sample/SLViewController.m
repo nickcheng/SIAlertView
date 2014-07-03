@@ -27,16 +27,13 @@
     NSString *title = @"Allow new members to see the groups’s history?";
     NSString *message = @"We can archive all current messages in the group to hide it from the new members you invite here. Current team members will still be able to access the history from a link to the archives.";
     
-    SIAlertView *alert = [[SIAlertView alloc] initWithTitle:title andMessage:message];
-    
-    alert.transitionStyle = SIAlertViewTransitionStyleSlideFromBottom;
-    alert.backgroundStyle = SIAlertViewBackgroundStyleSolid;
-    alert.buttonsListStyle = SIAlertViewButtonsListStyleRows;
-    
-    [alert addButtonWithTitle:@"NO" type:SIAlertViewButtonTypeCancel handler:NULL];
-    [alert addButtonWithTitle:@"YES" type:SIAlertViewButtonTypeDefault handler:NULL];
-
-    [alert show];
+    [SIAlertView showWithTitle:title message:message
+             cancelButtonTitle:@"NO" cancelHandler:^(SIAlertView *alertView) {
+                 NSLog(@"%s",__FUNCTION__);
+             }
+             acceptButtonTitle:@"YES" acceptHandler:^(SIAlertView *alertView) {
+                 NSLog(@"%s",__FUNCTION__);
+             }];
 }
 
 @end

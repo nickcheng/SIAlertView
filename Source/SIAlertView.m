@@ -250,6 +250,10 @@ static SIAlertView *__si_alert_current_view;
     appearance.destructiveButtonColor = [UIColor destructiveColor];
     appearance.cornerRadius = 14.0;
     appearance.shadowRadius = 0.0;
+    
+    appearance.transitionStyle = SIAlertViewTransitionStyleSlideFromBottom;
+    appearance.backgroundStyle = SIAlertViewBackgroundStyleSolid;
+    appearance.buttonsListStyle = SIAlertViewButtonsListStyleNormal;
 }
 
 - (id)init
@@ -267,6 +271,16 @@ static SIAlertView *__si_alert_current_view;
 		self.items = [[NSMutableArray alloc] init];
 	}
 	return self;
+}
+
++ (void)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SIAlertViewHandler)cancelHandler acceptButtonTitle:(NSString *)acceptTitle acceptHandler:(SIAlertViewHandler)acceptHandler
+{
+    SIAlertView *alert = [[SIAlertView alloc] initWithTitle:title andMessage:message];
+    if (alert) {
+        [alert addButtonWithTitle:cancelTitle type:SIAlertViewButtonTypeCancel handler:cancelHandler];
+        [alert addButtonWithTitle:acceptTitle type:SIAlertViewButtonTypeDefault handler:acceptHandler];
+        [alert show];
+    }
 }
 
 #pragma mark - Class methods
