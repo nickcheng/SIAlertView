@@ -2,7 +2,7 @@
 //  SLKAlertView.h
 //  Slack
 //
-//  Created by Ignacio on 7/3/14.
+//  Created by Ignacio Romero Z. on 7/3/14.
 //  Based on SIAlerView from Kevin Cao https://github.com/Sumi-Interactive/SIAlertView
 //  Copyright (c) 2013年 Sumi Interactive. All rights reserved.
 

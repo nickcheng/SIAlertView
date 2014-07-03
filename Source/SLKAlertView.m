@@ -2,7 +2,7 @@
 //  SLKAlertView.m
 //  Slack
 //
-//  Created by Ignacio on 7/3/14.
+//  Created by Ignacio Romero Z. on 7/3/14.
 //  Based on SIAlerView from Kevin Cao https://github.com/Sumi-Interactive/SLKAlertView
 //  Copyright (c) 2013年 Sumi Interactive. All rights reserved.
 
@@ -27,13 +27,13 @@
 #define BUTTON_BORDER_WIDTH 1.0
 #define CONTAINER_WIDTH 300
 
-const UIWindowLevel UIWindowLevelSLKAlert = 1996.0;  // don't overlap system's alert
-const UIWindowLevel UIWindowLevelSLKAlertBackground = 1985.0; // below the alert window
-
 NSString *const SLKAlertViewWillShowNotification = @"SLKAlertViewWillShowNotification";
 NSString *const SLKAlertViewDidShowNotification = @"SLKAlertViewDidShowNotification";
 NSString *const SLKAlertViewWillDismissNotification = @"SLKAlertViewWillDismissNotification";
 NSString *const SLKAlertViewDidDismissNotification = @"SLKAlertViewDidDismissNotification";
+
+const UIWindowLevel UIWindowLevelSLKAlert = 1996.0;  // don't overlap system's alert
+const UIWindowLevel UIWindowLevelSLKAlertBackground = 1985.0; // below the alert window
 
 @class SLKAlertBackgroundWindow;
 
@@ -426,567 +426,6 @@ static SLKAlertView *__si_alert_current_view;
     return _messageLabel;
 }
 
-
-#pragma mark - Setters
-
-- (void)setTitle:(NSString *)title
-{
-    _title = title;
-	[self invalidateLayout];
-}
-
-- (void)setMessage:(NSString *)message
-{
-	_message = message;
-    [self invalidateLayout];
-}
-
-
-#pragma mark - Public
-
-- (void)addButtonWithTitle:(NSString *)title type:(SLKAlertViewButtonType)type handler:(SLKAlertViewHandler)handler
-{
-    SLKAlertItem *item = [[SLKAlertItem alloc] init];
-	item.title = title;
-	item.type = type;
-	item.action = handler;
-	[self.items addObject:item];
-}
-
-- (void)show
-{
-    if (self.isVisible) {
-        return;
-    }
-    
-    self.oldKeyWindow = [[UIApplication sharedApplication] keyWindow];
-
-    if ([self.oldKeyWindow respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-        self.oldTintAdjustmentMode = self.oldKeyWindow.tintAdjustmentMode;
-        self.oldKeyWindow.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
-    }
-
-    if (![[SLKAlertView sharedQueue] containsObject:self]) {
-        [[SLKAlertView sharedQueue] addObject:self];
-    }
-    
-    if ([SLKAlertView isAnimating]) {
-        return; // wait for next turn
-    }
-    
-    if ([SLKAlertView currentAlertView].isVisible) {
-        return; // wait for next turn
-    }
-    
-    if (self.willShowHandler) {
-        self.willShowHandler(self);
-    }
-    [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillShowNotification object:self userInfo:nil];
-    
-    self.visible = YES;
-    
-    [SLKAlertView setAnimating:YES];
-    [SLKAlertView setCurrentAlertView:self];
-    
-    // transition background
-    [SLKAlertView showBackground];
-    
-    SLKAlertViewController *viewController = [[SLKAlertViewController alloc] initWithNibName:nil bundle:nil];
-    viewController.alertView = self;
-    
-    if (!self.alertWindow) {
-        UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        window.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        window.opaque = NO;
-        window.windowLevel = UIWindowLevelSLKAlert;
-        window.rootViewController = viewController;
-        self.alertWindow = window;
-    }
-    [self.alertWindow makeKeyAndVisible];
-    
-    [self validateLayout];
-    
-    [self transitionInCompletion:^{
-        if (self.didShowHandler) {
-            self.didShowHandler(self);
-        }
-        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidShowNotification object:self userInfo:nil];
-
-        [self addParallaxEffect];
-        
-        [SLKAlertView setAnimating:NO];
-        
-        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
-        if (index < [SLKAlertView sharedQueue].count - 1) {
-            [self dismissAnimated:YES cleanup:NO]; // dismiss to show next alert view
-        }
-    }];
-}
-
-- (void)dismissAnimated:(BOOL)animated
-{
-    [self dismissAnimated:animated cleanup:YES];
-}
-
-- (void)dismissAnimated:(BOOL)animated cleanup:(BOOL)cleanup
-{
-    BOOL isVisible = self.isVisible;
-    
-    if (isVisible) {
-        if (self.willDismissHandler) {
-            self.willDismissHandler(self);
-        }
-        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillDismissNotification object:self userInfo:nil];
-
-        [self removeParallaxEffect];
-    }
-    
-    void (^dismissComplete)(void) = ^{
-        self.visible = NO;
-        
-        [self teardown];
-        
-        [SLKAlertView setCurrentAlertView:nil];
-        
-        SLKAlertView *nextAlertView;
-        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
-        if (index != NSNotFound && index < [SLKAlertView sharedQueue].count - 1) {
-            nextAlertView = [SLKAlertView sharedQueue][index + 1];
-        }
-        
-        if (cleanup) {
-            [[SLKAlertView sharedQueue] removeObject:self];
-        }
-        
-        [SLKAlertView setAnimating:NO];
-        
-        if (isVisible) {
-            if (self.didDismissHandler) {
-                self.didDismissHandler(self);
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidDismissNotification object:self userInfo:nil];
-        }
-        
-        // check if we should show next alert
-        if (!isVisible) {
-            return;
-        }
-        
-        if (nextAlertView) {
-            [nextAlertView show];
-        } else {
-            // show last alert view
-            if ([SLKAlertView sharedQueue].count > 0) {
-                SLKAlertView *alert = [[SLKAlertView sharedQueue] lastObject];
-                [alert show];
-            }
-        }
-    };
-    
-    if (animated && isVisible) {
-        [SLKAlertView setAnimating:YES];
-        [self transitionOutCompletion:dismissComplete];
-        
-        if ([SLKAlertView sharedQueue].count == 1) {
-            [SLKAlertView hideBackgroundAnimated:YES];
-        }
-        
-    } else {
-        dismissComplete();
-        
-        if ([SLKAlertView sharedQueue].count == 0) {
-            [SLKAlertView hideBackgroundAnimated:YES];
-        }
-    }
-    
-    UIWindow *window = self.oldKeyWindow;
-
-    if ([window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-        window.tintAdjustmentMode = self.oldTintAdjustmentMode;
-    }
-
-    if (!window) {
-        window = [UIApplication sharedApplication].windows[0];
-    }
-    [window makeKeyWindow];
-    window.hidden = NO;
-}
-
-#pragma mark - Transitions
-
-- (void)transitionInCompletion:(void(^)(void))completion
-{
-    switch (self.transitionStyle) {
-        case SLKAlertViewTransitionStyleSlideFromBottom:
-        {
-            CGRect rect = self.containerView.frame;
-            CGRect originalRect = rect;
-            rect.origin.y = self.bounds.size.height;
-            self.containerView.frame = rect;
-            [UIView animateWithDuration:0.3
-                             animations:^{
-                                 self.containerView.frame = originalRect;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleSlideFromTop:
-        {
-            CGRect rect = self.containerView.frame;
-            CGRect originalRect = rect;
-            rect.origin.y = -rect.size.height;
-            self.containerView.frame = rect;
-            [UIView animateWithDuration:0.3
-                             animations:^{
-                                 self.containerView.frame = originalRect;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleFade:
-        {
-            self.containerView.alpha = 0;
-            [UIView animateWithDuration:0.3
-                             animations:^{
-                                 self.containerView.alpha = 1;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleBounce:
-        {
-            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-            animation.values = @[@(0.01), @(1.2), @(0.9), @(1)];
-            animation.keyTimes = @[@(0), @(0.4), @(0.6), @(1)];
-            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-            animation.duration = 0.5;
-            animation.delegate = self;
-            [animation setValue:completion forKey:@"handler"];
-            [self.containerView.layer addAnimation:animation forKey:@"bouce"];
-        }
-            break;
-        case SLKAlertViewTransitionStyleDropDown:
-        {
-            CGFloat y = self.containerView.center.y;
-            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position.y"];
-            animation.values = @[@(y - self.bounds.size.height), @(y + 20), @(y - 10), @(y)];
-            animation.keyTimes = @[@(0), @(0.5), @(0.75), @(1)];
-            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-            animation.duration = 0.4;
-            animation.delegate = self;
-            [animation setValue:completion forKey:@"handler"];
-            [self.containerView.layer addAnimation:animation forKey:@"dropdown"];
-        }
-            break;
-        default:
-            break;
-    }
-}
-
-- (void)transitionOutCompletion:(void(^)(void))completion
-{
-    switch (self.transitionStyle) {
-        case SLKAlertViewTransitionStyleSlideFromBottom:
-        {
-            CGRect rect = self.containerView.frame;
-            rect.origin.y = self.bounds.size.height;
-            [UIView animateWithDuration:0.3
-                                  delay:0
-                                options:UIViewAnimationOptionCurveEaseIn
-                             animations:^{
-                                 self.containerView.frame = rect;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleSlideFromTop:
-        {
-            CGRect rect = self.containerView.frame;
-            rect.origin.y = -rect.size.height;
-            [UIView animateWithDuration:0.3
-                                  delay:0
-                                options:UIViewAnimationOptionCurveEaseIn
-                             animations:^{
-                                 self.containerView.frame = rect;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleFade:
-        {
-            [UIView animateWithDuration:0.25
-                             animations:^{
-                                 self.containerView.alpha = 0;
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        case SLKAlertViewTransitionStyleBounce:
-        {
-            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-            animation.values = @[@(1), @(1.2), @(0.01)];
-            animation.keyTimes = @[@(0), @(0.4), @(1)];
-            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-            animation.duration = 0.35;
-            animation.delegate = self;
-            [animation setValue:completion forKey:@"handler"];
-            [self.containerView.layer addAnimation:animation forKey:@"bounce"];
-            
-            self.containerView.transform = CGAffineTransformMakeScale(0.01, 0.01);
-        }
-            break;
-        case SLKAlertViewTransitionStyleDropDown:
-        {
-            CGPoint point = self.containerView.center;
-            point.y += self.bounds.size.height;
-            [UIView animateWithDuration:0.3
-                                  delay:0
-                                options:UIViewAnimationOptionCurveEaseIn
-                             animations:^{
-                                 self.containerView.center = point;
-                                 CGFloat angle = ((CGFloat)arc4random_uniform(100) - 50.f) / 100.f;
-                                 self.containerView.transform = CGAffineTransformMakeRotation(angle);
-                             }
-                             completion:^(BOOL finished) {
-                                 if (completion) {
-                                     completion();
-                                 }
-                             }];
-        }
-            break;
-        default:
-            break;
-    }
-}
-
-- (void)resetTransition
-{
-    [self.containerView.layer removeAllAnimations];
-}
-
-#pragma mark - Layout
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    [self validateLayout];
-}
-
-- (void)invalidateLayout
-{
-    self.layoutDirty = YES;
-    [self setNeedsLayout];
-}
-
-- (void)validateLayout
-{
-    if (!self.isLayoutDirty) {
-        return;
-    }
-    self.layoutDirty = NO;
-    
-    CGFloat height = [self preferredHeight];
-    CGFloat left = roundf((self.bounds.size.width - CONTAINER_WIDTH) * 0.5);
-    CGFloat top = roundf((self.bounds.size.height - height) * 0.5);
-    
-    self.containerView.transform = CGAffineTransformIdentity;
-    self.containerView.frame = CGRectMake(left, top, CONTAINER_WIDTH, height);
-    
-    CGFloat y = CONTENT_PADDING_TOP;
-    
-	if (self.titleLabel)
-    {
-        self.titleLabel.text = self.title;
-        CGFloat height = [self heightForTitleLabel];
-        self.titleLabel.frame = CGRectMake(CONTENT_PADDING_LEFT, y, self.containerView.bounds.size.width - CONTENT_PADDING_LEFT * 2, height);
-        y += height;
-	}
-    if (self.messageLabel)
-    {
-        if (y > CONTENT_PADDING_TOP) {
-            y += GAP;
-        }
-        self.messageLabel.text = self.message;
-        CGFloat height = [self heightForMessageLabel];
-        self.messageLabel.frame = CGRectMake(CONTENT_PADDING_LEFT, y, self.containerView.bounds.size.width - CONTENT_PADDING_LEFT * 2, height);
-        y += height;
-    }
-    if (self.items.count > 0)
-    {
-        CGFloat y = (CGRectGetMaxY(self.containerView.bounds)-BUTTON_HEIGHT)+BUTTON_BORDER_WIDTH;
-        
-        if (self.items.count == 1)
-        {
-            CGFloat width = self.containerView.bounds.size.width;
-            width+=BUTTON_BORDER_WIDTH*2;
-            
-            UIButton *button = self.buttons[0];
-            button.frame = CGRectMake(-BUTTON_BORDER_WIDTH, y, width, BUTTON_HEIGHT);
-        }
-        else if (self.items.count == 2)
-        {
-            CGFloat width = self.containerView.bounds.size.width/2.0;
-            width+=BUTTON_BORDER_WIDTH;
-            
-            UIButton *button = self.buttons[0];
-            button.frame = CGRectMake(-BUTTON_BORDER_WIDTH, y, width, BUTTON_HEIGHT);
-
-            button = self.buttons[1];
-            button.frame = CGRectMake(width-(BUTTON_BORDER_WIDTH*2), y, width+BUTTON_BORDER_WIDTH, BUTTON_HEIGHT);
-        }
-    }
-}
-
-- (CGFloat)preferredHeight
-{
-	CGFloat height = CONTENT_PADDING_TOP;
-    
-	if (self.title)
-    {
-		height += [self heightForTitleLabel];
-	}
-    if (self.message)
-    {
-        if (height > CONTENT_PADDING_TOP) {
-            height += GAP;
-        }
-        height += [self heightForMessageLabel];
-    }
-    if (self.items.count > 0)
-    {
-        if (height > CONTENT_PADDING_TOP) {
-            height += GAP;
-        }
-        if (self.items.count > 0) {
-            height += BUTTON_HEIGHT;
-        }
-    }
-    
-    height += CONTENT_PADDING_BOTTOM;
-    
-	return roundf(height);
-}
-
-- (CGFloat)heightForTitleLabel
-{
-    if (self.title.length > 0)
-    {
-        CGFloat maxHeight = self.titleLabel.font.lineHeight * TITLE_MIN_LINE_COUNT;
-        
-        NSMutableParagraphStyle *paragraphStyle = [NSMutableParagraphStyle new];
-        paragraphStyle.lineBreakMode = self.titleLabel.lineBreakMode;
-        paragraphStyle.alignment = self.titleLabel.textAlignment;
-        
-        NSDictionary *attributes = @{NSFontAttributeName:self.titleLabel.font,
-                                     NSParagraphStyleAttributeName:paragraphStyle};
-        
-        CGSize size = [self.title boundingRectWithSize:CGSizeMake(CONTAINER_WIDTH - CONTENT_PADDING_LEFT * 2, maxHeight) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:attributes context:nil].size;
-        
-        return roundf(size.height);
-    }
-    return 0.0;
-}
-
-- (CGFloat)heightForMessageLabel
-{
-    if (self.message.length > 0)
-    {
-        CGFloat minHeight = self.messageLabel.font.lineHeight * MESSAGE_MIN_LINE_COUNT;
-        CGFloat maxHeight = self.messageLabel.font.lineHeight * MESSAGE_MAX_LINE_COUNT;
-        
-        NSMutableParagraphStyle *paragraphStyle = [NSMutableParagraphStyle new];
-        paragraphStyle.lineBreakMode = self.messageLabel.lineBreakMode;
-        paragraphStyle.alignment = self.messageLabel.textAlignment;
-        
-        NSDictionary *attributes = @{NSFontAttributeName:self.messageLabel.font,
-                                     NSParagraphStyleAttributeName:paragraphStyle};
-        
-        CGSize size = [self.message boundingRectWithSize:CGSizeMake(CONTAINER_WIDTH - CONTENT_PADDING_LEFT * 2, maxHeight) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:attributes context:nil].size;
-        
-        return roundf(MAX(minHeight, size.height+GAP));
-    }
-    return 0.0;
-}
-
-#pragma mark - Setup
-
-- (void)setup
-{
-    [self updateTitleLabel];
-    [self updateMessageLabel];
-    [self setupButtons];
-    [self invalidateLayout];
-}
-
-- (void)teardown
-{
-    [self.containerView removeFromSuperview];
-    self.containerView = nil;
-    self.titleLabel = nil;
-    self.messageLabel = nil;
-    [self.buttons removeAllObjects];
-    [self.alertWindow removeFromSuperview];
-    self.alertWindow = nil;
-    self.layoutDirty = NO;
-}
-
-- (void)updateTitleLabel
-{
-	if (self.title) {
-		self.titleLabel.text = self.title;
-	} else {
-		[self.titleLabel removeFromSuperview];
-		self.titleLabel = nil;
-	}
-    [self invalidateLayout];
-}
-
-- (void)updateMessageLabel
-{
-    if (self.message) {
-        self.messageLabel.text = self.message;
-    } else {
-        [self.messageLabel removeFromSuperview];
-        self.messageLabel = nil;
-    }
-    [self invalidateLayout];
-}
-
-- (void)setupButtons
-{
-    self.buttons = [[NSMutableArray alloc] initWithCapacity:self.items.count];
-    
-    for (NSUInteger i = 0; i < self.items.count; i++) {
-        UIButton *button = [self buttonForItemIndex:i];
-        [self.buttons addObject:button];
-        [self.containerView addSubview:button];
-    }
-}
-
 - (UIButton *)buttonForItemIndex:(NSUInteger)index
 {
     SLKAlertItem *item = self.items[index];
@@ -1043,27 +482,29 @@ static SLKAlertView *__si_alert_current_view;
 }
 
 
-#pragma mark - Actions
+#pragma mark - Setters
 
-- (void)buttonAction:(UIButton *)button
+- (void)setTitle:(NSString *)title
 {
-	[SLKAlertView setAnimating:YES]; // set this flag to YES in order to prevent showing another alert in action block
-    SLKAlertItem *item = self.items[button.tag];
-	if (item.action) {
-		item.action(self);
-	}
-	[self dismissAnimated:YES];
+    _title = title;
+	[self invalidateLayout];
 }
 
-#pragma mark - CAAnimation delegate
-
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+- (void)setMessage:(NSString *)message
 {
-    void(^completion)(void) = [anim valueForKey:@"handler"];
-    if (completion) {
-        completion();
-    }
+	_message = message;
+    [self invalidateLayout];
 }
+
+- (void)addButtonWithTitle:(NSString *)title type:(SLKAlertViewButtonType)type handler:(SLKAlertViewHandler)handler
+{
+    SLKAlertItem *item = [[SLKAlertItem alloc] init];
+	item.title = title;
+	item.type = type;
+	item.action = handler;
+	[self.items addObject:item];
+}
+
 
 #pragma mark - UIAppearance setters
 
@@ -1184,7 +625,587 @@ static SLKAlertView *__si_alert_current_view;
 }
 
 
-# pragma mark - Enable parallax effect (iOS7 only)
+#pragma mark - Public
+
+- (void)show
+{
+    if (self.isVisible) {
+        return;
+    }
+    
+    self.oldKeyWindow = [[UIApplication sharedApplication] keyWindow];
+
+    if ([self.oldKeyWindow respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+        self.oldTintAdjustmentMode = self.oldKeyWindow.tintAdjustmentMode;
+        self.oldKeyWindow.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
+    }
+
+    if (![[SLKAlertView sharedQueue] containsObject:self]) {
+        [[SLKAlertView sharedQueue] addObject:self];
+    }
+    
+    if ([SLKAlertView isAnimating]) {
+        return; // wait for next turn
+    }
+    
+    if ([SLKAlertView currentAlertView].isVisible) {
+        return; // wait for next turn
+    }
+    
+    if (self.willShowHandler) {
+        self.willShowHandler(self);
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillShowNotification object:self userInfo:nil];
+    
+    self.visible = YES;
+    
+    [SLKAlertView setAnimating:YES];
+    [SLKAlertView setCurrentAlertView:self];
+    
+    // transition background
+    [SLKAlertView showBackground];
+    
+    SLKAlertViewController *viewController = [[SLKAlertViewController alloc] initWithNibName:nil bundle:nil];
+    viewController.alertView = self;
+    
+    if (!self.alertWindow)
+    {
+        UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        window.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        window.opaque = NO;
+        window.windowLevel = UIWindowLevelSLKAlert;
+        window.rootViewController = viewController;
+        self.alertWindow = window;
+    }
+    [self.alertWindow makeKeyAndVisible];
+    
+    [self validateLayout];
+    
+    [self transitionInCompletion:^{
+        if (self.didShowHandler) {
+            self.didShowHandler(self);
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidShowNotification object:self userInfo:nil];
+
+        [self addParallaxEffect];
+        
+        [SLKAlertView setAnimating:NO];
+        
+        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
+        if (index < [SLKAlertView sharedQueue].count - 1) {
+            [self dismissAnimated:YES cleanup:NO]; // dismiss to show next alert view
+        }
+    }];
+}
+
+- (void)dismissAnimated:(BOOL)animated
+{
+    [self dismissAnimated:animated cleanup:YES];
+}
+
+- (void)dismissAnimated:(BOOL)animated cleanup:(BOOL)cleanup
+{
+    BOOL isVisible = self.isVisible;
+    
+    if (isVisible) {
+        if (self.willDismissHandler) {
+            self.willDismissHandler(self);
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillDismissNotification object:self userInfo:nil];
+
+        [self removeParallaxEffect];
+    }
+    
+    void (^dismissComplete)(void) = ^{
+        self.visible = NO;
+        
+        [self teardown];
+        
+        [SLKAlertView setCurrentAlertView:nil];
+        
+        SLKAlertView *nextAlertView;
+        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
+        if (index != NSNotFound && index < [SLKAlertView sharedQueue].count - 1) {
+            nextAlertView = [SLKAlertView sharedQueue][index + 1];
+        }
+        
+        if (cleanup) {
+            [[SLKAlertView sharedQueue] removeObject:self];
+        }
+        
+        [SLKAlertView setAnimating:NO];
+        
+        if (isVisible) {
+            if (self.didDismissHandler) {
+                self.didDismissHandler(self);
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidDismissNotification object:self userInfo:nil];
+        }
+        
+        // check if we should show next alert
+        if (!isVisible) {
+            return;
+        }
+        
+        if (nextAlertView) {
+            [nextAlertView show];
+        } else {
+            // show last alert view
+            if ([SLKAlertView sharedQueue].count > 0) {
+                SLKAlertView *alert = [[SLKAlertView sharedQueue] lastObject];
+                [alert show];
+            }
+        }
+    };
+    
+    if (animated && isVisible) {
+        [SLKAlertView setAnimating:YES];
+        [self transitionOutCompletion:dismissComplete];
+        
+        if ([SLKAlertView sharedQueue].count == 1) {
+            [SLKAlertView hideBackgroundAnimated:YES];
+        }
+        
+    } else {
+        dismissComplete();
+        
+        if ([SLKAlertView sharedQueue].count == 0) {
+            [SLKAlertView hideBackgroundAnimated:YES];
+        }
+    }
+    
+    UIWindow *window = self.oldKeyWindow;
+
+    if ([window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+        window.tintAdjustmentMode = self.oldTintAdjustmentMode;
+    }
+
+    if (!window) {
+        window = [UIApplication sharedApplication].windows[0];
+    }
+    [window makeKeyWindow];
+    window.hidden = NO;
+}
+
+
+#pragma mark - Transitions
+
+- (void)transitionInCompletion:(void(^)(void))completion
+{
+    switch (self.transitionStyle)
+    {
+        case SLKAlertViewTransitionStyleSlideFromBottom:
+        {
+            CGRect rect = self.containerView.frame;
+            CGRect originalRect = rect;
+            rect.origin.y = self.bounds.size.height;
+            self.containerView.frame = rect;
+            [UIView animateWithDuration:0.3
+                             animations:^{
+                                 self.containerView.frame = originalRect;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleSlideFromTop:
+        {
+            CGRect rect = self.containerView.frame;
+            CGRect originalRect = rect;
+            rect.origin.y = -rect.size.height;
+            self.containerView.frame = rect;
+            [UIView animateWithDuration:0.3
+                             animations:^{
+                                 self.containerView.frame = originalRect;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleFade:
+        {
+            self.containerView.alpha = 0;
+            [UIView animateWithDuration:0.3
+                             animations:^{
+                                 self.containerView.alpha = 1;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleBounce:
+        {
+            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+            animation.values = @[@(0.01), @(1.2), @(0.9), @(1)];
+            animation.keyTimes = @[@(0), @(0.4), @(0.6), @(1)];
+            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+            animation.duration = 0.5;
+            animation.delegate = self;
+            [animation setValue:completion forKey:@"handler"];
+            [self.containerView.layer addAnimation:animation forKey:@"bouce"];
+        }
+            break;
+        case SLKAlertViewTransitionStyleDropDown:
+        {
+            CGFloat y = self.containerView.center.y;
+            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position.y"];
+            animation.values = @[@(y - self.bounds.size.height), @(y + 20), @(y - 10), @(y)];
+            animation.keyTimes = @[@(0), @(0.5), @(0.75), @(1)];
+            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+            animation.duration = 0.4;
+            animation.delegate = self;
+            [animation setValue:completion forKey:@"handler"];
+            [self.containerView.layer addAnimation:animation forKey:@"dropdown"];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)transitionOutCompletion:(void(^)(void))completion
+{
+    switch (self.transitionStyle)
+    {
+        case SLKAlertViewTransitionStyleSlideFromBottom:
+        {
+            CGRect rect = self.containerView.frame;
+            rect.origin.y = self.bounds.size.height;
+            [UIView animateWithDuration:0.3
+                                  delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                                 self.containerView.frame = rect;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleSlideFromTop:
+        {
+            CGRect rect = self.containerView.frame;
+            rect.origin.y = -rect.size.height;
+            [UIView animateWithDuration:0.3
+                                  delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                                 self.containerView.frame = rect;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleFade:
+        {
+            [UIView animateWithDuration:0.25
+                             animations:^{
+                                 self.containerView.alpha = 0;
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        case SLKAlertViewTransitionStyleBounce:
+        {
+            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+            animation.values = @[@(1), @(1.2), @(0.01)];
+            animation.keyTimes = @[@(0), @(0.4), @(1)];
+            animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+            animation.duration = 0.35;
+            animation.delegate = self;
+            [animation setValue:completion forKey:@"handler"];
+            [self.containerView.layer addAnimation:animation forKey:@"bounce"];
+            
+            self.containerView.transform = CGAffineTransformMakeScale(0.01, 0.01);
+        }
+            break;
+        case SLKAlertViewTransitionStyleDropDown:
+        {
+            CGPoint point = self.containerView.center;
+            point.y += self.bounds.size.height;
+            [UIView animateWithDuration:0.3
+                                  delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                                 self.containerView.center = point;
+                                 CGFloat angle = ((CGFloat)arc4random_uniform(100) - 50.f) / 100.f;
+                                 self.containerView.transform = CGAffineTransformMakeRotation(angle);
+                             }
+                             completion:^(BOOL finished) {
+                                 if (completion) {
+                                     completion();
+                                 }
+                             }];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)resetTransition
+{
+    [self.containerView.layer removeAllAnimations];
+}
+
+
+#pragma mark - Layout
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    [self validateLayout];
+}
+
+- (void)invalidateLayout
+{
+    self.layoutDirty = YES;
+    [self setNeedsLayout];
+}
+
+- (void)validateLayout
+{
+    if (!self.isLayoutDirty) {
+        return;
+    }
+    self.layoutDirty = NO;
+    
+    CGFloat height = [self preferredHeight];
+    CGFloat left = roundf((self.bounds.size.width - CONTAINER_WIDTH) * 0.5);
+    CGFloat top = roundf((self.bounds.size.height - height) * 0.5);
+    
+    self.containerView.transform = CGAffineTransformIdentity;
+    self.containerView.frame = CGRectMake(left, top, CONTAINER_WIDTH, height);
+    
+    CGFloat y = CONTENT_PADDING_TOP;
+    
+	if (self.titleLabel)
+    {
+        self.titleLabel.text = self.title;
+        CGFloat height = [self heightForTitleLabel];
+        self.titleLabel.frame = CGRectMake(CONTENT_PADDING_LEFT, y, self.containerView.bounds.size.width - CONTENT_PADDING_LEFT * 2, height);
+        y += height;
+	}
+    if (self.messageLabel)
+    {
+        if (y > CONTENT_PADDING_TOP) {
+            y += GAP;
+        }
+        self.messageLabel.text = self.message;
+        CGFloat height = [self heightForMessageLabel];
+        self.messageLabel.frame = CGRectMake(CONTENT_PADDING_LEFT, y, self.containerView.bounds.size.width - CONTENT_PADDING_LEFT * 2, height);
+        y += height;
+    }
+    if (self.items.count > 0)
+    {
+        y = (CGRectGetMaxY(self.containerView.bounds)-BUTTON_HEIGHT)+BUTTON_BORDER_WIDTH;
+        
+        if (self.items.count == 1)
+        {
+            CGFloat width = self.containerView.bounds.size.width;
+            width+=BUTTON_BORDER_WIDTH*2;
+            
+            UIButton *button = self.buttons[0];
+            button.frame = CGRectMake(-BUTTON_BORDER_WIDTH, y, width, BUTTON_HEIGHT);
+        }
+        else if (self.items.count == 2)
+        {
+            CGFloat width = self.containerView.bounds.size.width/2.0;
+            width+=BUTTON_BORDER_WIDTH;
+            
+            UIButton *button = self.buttons[0];
+            button.frame = CGRectMake(-BUTTON_BORDER_WIDTH, y, width, BUTTON_HEIGHT);
+
+            button = self.buttons[1];
+            button.frame = CGRectMake(width-(BUTTON_BORDER_WIDTH*2), y, width+BUTTON_BORDER_WIDTH, BUTTON_HEIGHT);
+        }
+    }
+}
+
+- (CGFloat)preferredHeight
+{
+	CGFloat height = CONTENT_PADDING_TOP;
+    
+	if (self.title) {
+		height += [self heightForTitleLabel];
+	}
+    if (self.message)
+    {
+        if (height > CONTENT_PADDING_TOP) {
+            height += GAP;
+        }
+        height += [self heightForMessageLabel];
+    }
+    if (self.items.count > 0)
+    {
+        if (height > CONTENT_PADDING_TOP) {
+            height += GAP;
+        }
+        if (self.items.count > 0) {
+            height += BUTTON_HEIGHT;
+        }
+    }
+    
+    height += CONTENT_PADDING_BOTTOM;
+    
+	return roundf(height);
+}
+
+- (CGFloat)heightForTitleLabel
+{
+    if (self.title.length > 0)
+    {
+        CGFloat maxHeight = self.titleLabel.font.lineHeight * TITLE_MIN_LINE_COUNT;
+        
+        NSMutableParagraphStyle *paragraphStyle = [NSMutableParagraphStyle new];
+        paragraphStyle.lineBreakMode = self.titleLabel.lineBreakMode;
+        paragraphStyle.alignment = self.titleLabel.textAlignment;
+        
+        NSDictionary *attributes = @{NSFontAttributeName:self.titleLabel.font,
+                                     NSParagraphStyleAttributeName:paragraphStyle};
+        
+        CGSize size = [self.title boundingRectWithSize:CGSizeMake(CONTAINER_WIDTH - CONTENT_PADDING_LEFT * 2, maxHeight) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:attributes context:nil].size;
+        
+        return roundf(size.height);
+    }
+    return 0.0;
+}
+
+- (CGFloat)heightForMessageLabel
+{
+    if (self.message.length > 0)
+    {
+        CGFloat minHeight = self.messageLabel.font.lineHeight * MESSAGE_MIN_LINE_COUNT;
+        CGFloat maxHeight = self.messageLabel.font.lineHeight * MESSAGE_MAX_LINE_COUNT;
+        
+        NSMutableParagraphStyle *paragraphStyle = [NSMutableParagraphStyle new];
+        paragraphStyle.lineBreakMode = self.messageLabel.lineBreakMode;
+        paragraphStyle.alignment = self.messageLabel.textAlignment;
+        
+        NSDictionary *attributes = @{NSFontAttributeName:self.messageLabel.font,
+                                     NSParagraphStyleAttributeName:paragraphStyle};
+        
+        CGSize size = [self.message boundingRectWithSize:CGSizeMake(CONTAINER_WIDTH - CONTENT_PADDING_LEFT * 2, maxHeight) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:attributes context:nil].size;
+        
+        return roundf(MAX(minHeight, size.height+GAP));
+    }
+    return 0.0;
+}
+
+
+#pragma mark - Setup
+
+- (void)setup
+{
+    [self updateTitleLabel];
+    [self updateMessageLabel];
+    [self setupButtons];
+    [self invalidateLayout];
+}
+
+- (void)teardown
+{
+    [_containerView removeFromSuperview];
+    _containerView = nil;
+    _titleLabel = nil;
+    _messageLabel = nil;
+    
+    [_buttons removeAllObjects];
+    
+    [_alertWindow removeFromSuperview];
+    _alertWindow = nil;
+    
+    _layoutDirty = NO;
+}
+
+- (void)updateTitleLabel
+{
+	if (self.title.length > 0)
+    {
+		self.titleLabel.text = self.title;
+	}
+    else {
+		[_titleLabel removeFromSuperview];
+		_titleLabel = nil;
+	}
+    
+    [self invalidateLayout];
+}
+
+- (void)updateMessageLabel
+{
+    if (self.message.length > 0)
+    {
+        self.messageLabel.text = self.message;
+    }
+    else {
+        [_messageLabel removeFromSuperview];
+        _messageLabel = nil;
+    }
+    
+    [self invalidateLayout];
+}
+
+- (void)setupButtons
+{
+    self.buttons = [[NSMutableArray alloc] initWithCapacity:self.items.count];
+    
+    for (NSUInteger i = 0; i < self.items.count; i++)
+    {
+        UIButton *button = [self buttonForItemIndex:i];
+        [self.buttons addObject:button];
+        [self.containerView addSubview:button];
+    }
+}
+
+
+#pragma mark - Actions
+
+- (void)buttonAction:(UIButton *)button
+{
+	[SLKAlertView setAnimating:YES]; // set this flag to YES in order to prevent showing another alert in action block
+    
+    SLKAlertItem *item = self.items[button.tag];
+    
+	if (item.action) {
+		item.action(self);
+	}
+    
+	[self dismissAnimated:YES];
+}
+
+
+#pragma mark - CAAnimation delegate
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+{
+    void(^completion)(void) = [anim valueForKey:@"handler"];
+    if (completion) {
+        completion();
+    }
+}
+
+
+#pragma mark - Enable parallax effect (iOS7 only)
 
 - (void)addParallaxEffect
 {
