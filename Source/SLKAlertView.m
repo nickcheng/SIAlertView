@@ -285,10 +285,10 @@ static SLKAlertView *__si_alert_current_view;
 
 - (instancetype)init
 {
-	return [self initWithTitle:nil andMessage:nil];
+	return [self initWithTitle:nil message:nil];
 }
 
-- (instancetype)initWithTitle:(NSString *)title andMessage:(NSString *)message
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message;
 {
 	self = [super init];
 	if (self) {
@@ -307,7 +307,7 @@ static SLKAlertView *__si_alert_current_view;
 
 + (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewHandler)accepted didCancel:(SLKAlertViewHandler)cancelled
 {
-    SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title andMessage:message];
+    SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title message:message];
     if (alert) {
         if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:accepted];
         if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SLKAlertViewButtonTypeCancel handler:cancelled];
@@ -750,7 +750,8 @@ static SLKAlertView *__si_alert_current_view;
         
         if (nextAlertView) {
             [nextAlertView show];
-        } else {
+        }
+        else {
             // show last alert view
             if ([SLKAlertView sharedQueue].count > 0) {
                 SLKAlertView *alert = [[SLKAlertView sharedQueue] lastObject];
@@ -759,7 +760,8 @@ static SLKAlertView *__si_alert_current_view;
         }
     };
     
-    if (animated && isVisible) {
+    if (animated && isVisible)
+    {
         [SLKAlertView setAnimating:YES];
         [self transitionOutCompletion:dismissComplete];
         
@@ -767,7 +769,8 @@ static SLKAlertView *__si_alert_current_view;
             [SLKAlertView hideBackgroundAnimated:YES];
         }
         
-    } else {
+    }
+    else {
         dismissComplete();
         
         if ([SLKAlertView sharedQueue].count == 0) {
@@ -1205,7 +1208,7 @@ static SLKAlertView *__si_alert_current_view;
 }
 
 
-#pragma mark - Enable parallax effect (iOS7 only)
+#pragma mark - Enable parallax effect
 
 - (void)addParallaxEffect
 {
