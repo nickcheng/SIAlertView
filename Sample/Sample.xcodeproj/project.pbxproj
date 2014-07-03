@@ -39,7 +39,6 @@
 		4F2F040B1964EBB9004A6EEB /* Lato-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03F51964EBB9004A6EEB /* Lato-ThinItalic.ttf */; };
 		4F2F040C1964EBB9004A6EEB /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03F61964EBB9004A6EEB /* OFL.txt */; };
 		4F2F04141964EC4B004A6EEB /* SLKAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F04101964EC4B004A6EEB /* SLKAlertView.m */; };
-		4F2F04151964EC4B004A6EEB /* UIWindow+SIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F04121964EC4B004A6EEB /* UIWindow+SIUtils.m */; };
 		CAAAD08A3FF04E63A86D65B1 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D90B07B8007B46558FC3AD62 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -86,8 +85,6 @@
 		4F2F03F61964EBB9004A6EEB /* OFL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		4F2F040F1964EC4B004A6EEB /* SLKAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SLKAlertView.h; sourceTree = "<group>"; };
 		4F2F04101964EC4B004A6EEB /* SLKAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SLKAlertView.m; sourceTree = "<group>"; };
-		4F2F04111964EC4B004A6EEB /* UIWindow+SIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWindow+SIUtils.h"; sourceTree = "<group>"; };
-		4F2F04121964EC4B004A6EEB /* UIWindow+SIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWindow+SIUtils.m"; sourceTree = "<group>"; };
 		B3F02CD58B44418E96383319 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		D90B07B8007B46558FC3AD62 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -225,8 +222,6 @@
 			children = (
 				4F2F040F1964EC4B004A6EEB /* SLKAlertView.h */,
 				4F2F04101964EC4B004A6EEB /* SLKAlertView.m */,
-				4F2F04111964EC4B004A6EEB /* UIWindow+SIUtils.h */,
-				4F2F04121964EC4B004A6EEB /* UIWindow+SIUtils.m */,
 			);
 			name = SIAlert;
 			path = ../../Source;
@@ -356,7 +351,6 @@
 				4F2F03AF1964E846004A6EEB /* main.m in Sources */,
 				4F2F03F81964EBB9004A6EEB /* UIColor+Slack.m in Sources */,
 				4F2F03F91964EBB9004A6EEB /* UIFont+Slack.m in Sources */,
-				4F2F04151964EC4B004A6EEB /* UIWindow+SIUtils.m in Sources */,
 				4F2F04141964EC4B004A6EEB /* SLKAlertView.m in Sources */,
 				4F2F03BC1964E846004A6EEB /* SLViewController.m in Sources */,
 				4F2F03B31964E846004A6EEB /* SLAppDelegate.m in Sources */,

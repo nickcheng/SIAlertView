@@ -10,7 +10,6 @@
 #import "SLAppearance.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import "UIWindow+SIUtils.h"
 #import "UIColor+Hex.h"
 #import "UIColor+Effect.h"
 
@@ -127,6 +126,48 @@ static SLKAlertView *__si_alert_current_view;
 @end
 
 
+#pragma mark - UIWindow+ViewController
+
+@interface UIWindow (ViewController)
+- (UIViewController *)currentViewController;
+- (UIViewController *)viewControllerForStatusBarStyle;
+- (UIViewController *)viewControllerForStatusBarHidden;
+@end
+
+@implementation UIWindow (ViewController)
+
+- (UIViewController *)currentViewController
+{
+    UIViewController *viewController = self.rootViewController;
+    while (viewController.presentedViewController) {
+        viewController = viewController.presentedViewController;
+    }
+    return viewController;
+}
+
+- (UIViewController *)viewControllerForStatusBarStyle
+{
+    UIViewController *currentViewController = [self currentViewController];
+    
+    while ([currentViewController childViewControllerForStatusBarStyle]) {
+        currentViewController = [currentViewController childViewControllerForStatusBarStyle];
+    }
+    return currentViewController;
+}
+
+- (UIViewController *)viewControllerForStatusBarHidden
+{
+    UIViewController *currentViewController = [self currentViewController];
+    
+    while ([currentViewController childViewControllerForStatusBarHidden]) {
+        currentViewController = [currentViewController childViewControllerForStatusBarHidden];
+    }
+    return currentViewController;
+}
+
+@end
+
+
 #pragma mark - SLKAlertItem
 
 @interface SLKAlertItem : NSObject
@@ -137,7 +178,6 @@ static SLKAlertView *__si_alert_current_view;
 
 @implementation SLKAlertItem
 @end
-
 
 #pragma mark - SLKAlertViewController
 
