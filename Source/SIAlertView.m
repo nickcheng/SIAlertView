@@ -45,16 +45,14 @@ static SIAlertView *__si_alert_current_view;
 @property (nonatomic, strong) NSMutableArray *items;
 @property (nonatomic, weak) UIWindow *oldKeyWindow;
 @property (nonatomic, strong) UIWindow *alertWindow;
-#ifdef __IPHONE_7_0
-@property (nonatomic, assign) UIViewTintAdjustmentMode oldTintAdjustmentMode;
-#endif
-@property (nonatomic, assign, getter = isVisible) BOOL visible;
 
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UILabel *messageLabel;
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) NSMutableArray *buttons;
+@property (nonatomic, assign) UIViewTintAdjustmentMode oldTintAdjustmentMode;
 
+@property (nonatomic, assign, getter = isVisible) BOOL visible;
 @property (nonatomic, assign, getter = isLayoutDirty) BOOL layoutDirty;
 
 + (NSMutableArray *)sharedQueue;
@@ -171,14 +169,12 @@ static SIAlertView *__si_alert_current_view;
     [self.alertView invalidateLayout];
 }
 
-#ifdef __IPHONE_7_0
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     if ([self respondsToSelector:@selector(setNeedsStatusBarAppearanceUpdate)]) {
         [self setNeedsStatusBarAppearanceUpdate];
     }
 }
-#endif
 
 - (NSUInteger)supportedInterfaceOrientations
 {
@@ -207,7 +203,6 @@ static SIAlertView *__si_alert_current_view;
     return YES;
 }
 
-#ifdef __IPHONE_7_0
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
     UIWindow *window = self.alertView.oldKeyWindow;
@@ -225,7 +220,6 @@ static SIAlertView *__si_alert_current_view;
     }
     return [[window viewControllerForStatusBarHidden] prefersStatusBarHidden];
 }
-#endif
 
 @end
 
@@ -376,12 +370,11 @@ static SIAlertView *__si_alert_current_view;
     }
     
     self.oldKeyWindow = [[UIApplication sharedApplication] keyWindow];
-#ifdef __IPHONE_7_0
+
     if ([self.oldKeyWindow respondsToSelector:@selector(setTintAdjustmentMode:)]) { // for iOS 7
         self.oldTintAdjustmentMode = self.oldKeyWindow.tintAdjustmentMode;
         self.oldKeyWindow.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
     }
-#endif
 
     if (![[SIAlertView sharedQueue] containsObject:self]) {
         [[SIAlertView sharedQueue] addObject:self];
@@ -430,9 +423,8 @@ static SIAlertView *__si_alert_current_view;
             self.didShowHandler(self);
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewDidShowNotification object:self userInfo:nil];
-        #ifdef __IPHONE_7_0
+
         [self addParallaxEffect];
-        #endif
         
         [SIAlertView setAnimating:NO];
         
@@ -457,9 +449,8 @@ static SIAlertView *__si_alert_current_view;
             self.willDismissHandler(self);
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewWillDismissNotification object:self userInfo:nil];
-        #ifdef __IPHONE_7_0
-                [self removeParallaxEffect];
-        #endif
+
+        [self removeParallaxEffect];
     }
     
     void (^dismissComplete)(void) = ^{
@@ -521,11 +512,11 @@ static SIAlertView *__si_alert_current_view;
     }
     
     UIWindow *window = self.oldKeyWindow;
-#ifdef __IPHONE_7_0
+
     if ([window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
         window.tintAdjustmentMode = self.oldTintAdjustmentMode;
     }
-#endif
+
     if (!window) {
         window = [UIApplication sharedApplication].windows[0];
     }
@@ -1156,7 +1147,6 @@ static SIAlertView *__si_alert_current_view;
 # pragma mark -
 # pragma mark Enable parallax effect (iOS7 only)
 
-#ifdef __IPHONE_7_0
 - (void)addParallaxEffect
 {
     if (_enabledParallaxEffect && NSClassFromString(@"UIInterpolatingMotionEffect"))
@@ -1181,6 +1171,5 @@ static SIAlertView *__si_alert_current_view;
         }];
     }
 }
-#endif
 
 @end
