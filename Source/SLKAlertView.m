@@ -1,12 +1,12 @@
 //
-//  SIAlertView.m
-//  SIAlertView
+//  SLKAlertView.m
+//  Slack
 //
-//  Created by Kevin Cao on 13-4-29.
+//  Created by Ignacio on 7/3/14.
+//  Based on SIAlerView from Kevin Cao https://github.com/Sumi-Interactive/SLKAlertView
 //  Copyright (c) 2013年 Sumi Interactive. All rights reserved.
-//
 
-#import "SIAlertView.h"
+#import "SLKAlertView.h"
 #import "SLAppearance.h"
 
 #import <QuartzCore/QuartzCore.h>
@@ -28,22 +28,22 @@
 #define BUTTON_BORDER_WIDTH 1.0
 #define CONTAINER_WIDTH 300
 
-const UIWindowLevel UIWindowLevelSIAlert = 1996.0;  // don't overlap system's alert
-const UIWindowLevel UIWindowLevelSIAlertBackground = 1985.0; // below the alert window
+const UIWindowLevel UIWindowLevelSLKAlert = 1996.0;  // don't overlap system's alert
+const UIWindowLevel UIWindowLevelSLKAlertBackground = 1985.0; // below the alert window
 
-NSString *const SIAlertViewWillShowNotification = @"SIAlertViewWillShowNotification";
-NSString *const SIAlertViewDidShowNotification = @"SIAlertViewDidShowNotification";
-NSString *const SIAlertViewWillDismissNotification = @"SIAlertViewWillDismissNotification";
-NSString *const SIAlertViewDidDismissNotification = @"SIAlertViewDidDismissNotification";
+NSString *const SLKAlertViewWillShowNotification = @"SLKAlertViewWillShowNotification";
+NSString *const SLKAlertViewDidShowNotification = @"SLKAlertViewDidShowNotification";
+NSString *const SLKAlertViewWillDismissNotification = @"SLKAlertViewWillDismissNotification";
+NSString *const SLKAlertViewDidDismissNotification = @"SLKAlertViewDidDismissNotification";
 
-@class SIAlertBackgroundWindow;
+@class SLKAlertBackgroundWindow;
 
 static NSMutableArray *__si_alert_queue;
 static BOOL __si_alert_animating;
-static SIAlertBackgroundWindow *__si_alert_background_window;
-static SIAlertView *__si_alert_current_view;
+static SLKAlertBackgroundWindow *__si_alert_background_window;
+static SLKAlertView *__si_alert_current_view;
 
-@interface SIAlertView ()
+@interface SLKAlertView ()
 
 @property (nonatomic, strong) NSMutableArray *items;
 @property (nonatomic, weak) UIWindow *oldKeyWindow;
@@ -59,7 +59,7 @@ static SIAlertView *__si_alert_current_view;
 @property (nonatomic, assign, getter = isLayoutDirty) BOOL layoutDirty;
 
 + (NSMutableArray *)sharedQueue;
-+ (SIAlertView *)currentAlertView;
++ (SLKAlertView *)currentAlertView;
 
 + (BOOL)isAnimating;
 + (void)setAnimating:(BOOL)animating;
@@ -75,24 +75,23 @@ static SIAlertView *__si_alert_current_view;
 
 #pragma mark - SIBackgroundWindow
 
-@interface SIAlertBackgroundWindow : UIWindow
-
+@interface SLKAlertBackgroundWindow : UIWindow
 @end
 
-@interface SIAlertBackgroundWindow ()
-@property (nonatomic, assign) SIAlertViewBackgroundStyle style;
+@interface SLKAlertBackgroundWindow ()
+@property (nonatomic, assign) SLKAlertViewBackgroundStyle style;
 @end
 
-@implementation SIAlertBackgroundWindow
+@implementation SLKAlertBackgroundWindow
 
-- (id)initWithFrame:(CGRect)frame andStyle:(SIAlertViewBackgroundStyle)style
+- (id)initWithFrame:(CGRect)frame andStyle:(SLKAlertViewBackgroundStyle)style
 {
     self = [super initWithFrame:frame];
     if (self) {
         self.style = style;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.opaque = NO;
-        self.windowLevel = UIWindowLevelSIAlertBackground;
+        self.windowLevel = UIWindowLevelSLKAlertBackground;
     }
     return self;
 }
@@ -101,7 +100,7 @@ static SIAlertView *__si_alert_current_view;
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
     switch (self.style) {
-        case SIAlertViewBackgroundStyleGradient:
+        case SLKAlertViewBackgroundStyleGradient:
         {
             size_t locationsCount = 2;
             CGFloat locations[2] = {0.0f, 1.0f};
@@ -116,7 +115,7 @@ static SIAlertView *__si_alert_current_view;
             CGGradientRelease(gradient);
             break;
         }
-        case SIAlertViewBackgroundStyleSolid:
+        case SLKAlertViewBackgroundStyleSolid:
         {
             [[UIColor colorWithWhite:0 alpha:0.5] set];
             CGContextFillRect(context, self.bounds);
@@ -127,29 +126,26 @@ static SIAlertView *__si_alert_current_view;
 
 @end
 
-#pragma mark - SIAlertItem
 
-@interface SIAlertItem : NSObject
+#pragma mark - SLKAlertItem
 
+@interface SLKAlertItem : NSObject
 @property (nonatomic, copy) NSString *title;
-@property (nonatomic, assign) SIAlertViewButtonType type;
-@property (nonatomic, copy) SIAlertViewHandler action;
-
+@property (nonatomic, assign) SLKAlertViewButtonType type;
+@property (nonatomic, copy) SLKAlertViewHandler action;
 @end
 
-@implementation SIAlertItem
-
+@implementation SLKAlertItem
 @end
 
-#pragma mark - SIAlertViewController
 
-@interface SIAlertViewController : UIViewController
+#pragma mark - SLKAlertViewController
 
-@property (nonatomic, strong) SIAlertView *alertView;
-
+@interface SLKAlertViewController : UIViewController
+@property (nonatomic, strong) SLKAlertView *alertView;
 @end
 
-@implementation SIAlertViewController
+@implementation SLKAlertViewController
 
 #pragma mark - View life cycle
 
@@ -224,16 +220,17 @@ static SIAlertView *__si_alert_current_view;
 
 @end
 
-#pragma mark - SIAlert
 
-@implementation SIAlertView
+#pragma mark - Initialization
+
+@implementation SLKAlertView
 
 + (void)initialize
 {
-    if (self != [SIAlertView class])
+    if (self != [SLKAlertView class])
         return;
     
-    SIAlertView *appearance = [self appearance];
+    SLKAlertView *appearance = [self appearance];
     appearance.viewBackgroundColor = [UIColor whiteColor];
     appearance.titleColor = [UIColor colorFromHex:@"3C4B5B"];
     appearance.messageColor = [UIColor colorFromHex:@"8A8B8B"];
@@ -246,12 +243,12 @@ static SIAlertView *__si_alert_current_view;
     appearance.cornerRadius = 10.0;
 }
 
-- (id)init
+- (instancetype)init
 {
 	return [self initWithTitle:nil andMessage:nil];
 }
 
-- (id)initWithTitle:(NSString *)title andMessage:(NSString *)message
+- (instancetype)initWithTitle:(NSString *)title andMessage:(NSString *)message
 {
 	self = [super init];
 	if (self) {
@@ -263,19 +260,20 @@ static SIAlertView *__si_alert_current_view;
 	return self;
 }
 
-+ (void)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SIAlertViewHandler)cancelHandler
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler
 {
-    [self showWithTitle:title message:message cancelButtonTitle:cancelTitle cancelHandler:cancelHandler acceptButtonTitle:nil acceptHandler:NULL];
+    return [self showWithTitle:title message:message cancelButtonTitle:cancelTitle cancelHandler:cancelHandler acceptButtonTitle:nil acceptHandler:NULL];
 }
 
-+ (void)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SIAlertViewHandler)cancelHandler acceptButtonTitle:(NSString *)acceptTitle acceptHandler:(SIAlertViewHandler)acceptHandler
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler acceptButtonTitle:(NSString *)acceptTitle acceptHandler:(SLKAlertViewHandler)acceptHandler
 {
-    SIAlertView *alert = [[SIAlertView alloc] initWithTitle:title andMessage:message];
+    SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title andMessage:message];
     if (alert) {
-        if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SIAlertViewButtonTypeCancel handler:cancelHandler];
-        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SIAlertViewButtonTypeDefault handler:acceptHandler];
+        if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SLKAlertViewButtonTypeCancel handler:cancelHandler];
+        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:acceptHandler];
         [alert show];
     }
+    return alert;
 }
 
 #pragma mark - Class methods
@@ -288,12 +286,12 @@ static SIAlertView *__si_alert_current_view;
     return __si_alert_queue;
 }
 
-+ (SIAlertView *)currentAlertView
++ (SLKAlertView *)currentAlertView
 {
     return __si_alert_current_view;
 }
 
-+ (void)setCurrentAlertView:(SIAlertView *)alertView
++ (void)setCurrentAlertView:(SLKAlertView *)alertView
 {
     __si_alert_current_view = alertView;
 }
@@ -311,8 +309,8 @@ static SIAlertView *__si_alert_current_view;
 + (void)showBackground
 {
     if (!__si_alert_background_window) {
-        __si_alert_background_window = [[SIAlertBackgroundWindow alloc] initWithFrame:[UIScreen mainScreen].bounds
-                                                                             andStyle:[SIAlertView currentAlertView].backgroundStyle];
+        __si_alert_background_window = [[SLKAlertBackgroundWindow alloc] initWithFrame:[UIScreen mainScreen].bounds
+                                                                             andStyle:[SLKAlertView currentAlertView].backgroundStyle];
         [__si_alert_background_window makeKeyAndVisible];
         __si_alert_background_window.alpha = 0;
         [UIView animateWithDuration:0.3
@@ -405,9 +403,9 @@ static SIAlertView *__si_alert_current_view;
 
 #pragma mark - Public
 
-- (void)addButtonWithTitle:(NSString *)title type:(SIAlertViewButtonType)type handler:(SIAlertViewHandler)handler
+- (void)addButtonWithTitle:(NSString *)title type:(SLKAlertViewButtonType)type handler:(SLKAlertViewHandler)handler
 {
-    SIAlertItem *item = [[SIAlertItem alloc] init];
+    SLKAlertItem *item = [[SLKAlertItem alloc] init];
 	item.title = title;
 	item.type = type;
 	item.action = handler;
@@ -427,41 +425,39 @@ static SIAlertView *__si_alert_current_view;
         self.oldKeyWindow.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
     }
 
-    if (![[SIAlertView sharedQueue] containsObject:self]) {
-        [[SIAlertView sharedQueue] addObject:self];
+    if (![[SLKAlertView sharedQueue] containsObject:self]) {
+        [[SLKAlertView sharedQueue] addObject:self];
     }
     
-    if ([SIAlertView isAnimating]) {
+    if ([SLKAlertView isAnimating]) {
         return; // wait for next turn
     }
     
-    if ([SIAlertView currentAlertView].isVisible) {
-        SIAlertView *alert = [SIAlertView currentAlertView];
-        [alert dismissAnimated:YES cleanup:NO];
+    if ([SLKAlertView currentAlertView].isVisible) {
         return;
     }
     
     if (self.willShowHandler) {
         self.willShowHandler(self);
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewWillShowNotification object:self userInfo:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillShowNotification object:self userInfo:nil];
     
     self.visible = YES;
     
-    [SIAlertView setAnimating:YES];
-    [SIAlertView setCurrentAlertView:self];
+    [SLKAlertView setAnimating:YES];
+    [SLKAlertView setCurrentAlertView:self];
     
     // transition background
-    [SIAlertView showBackground];
+    [SLKAlertView showBackground];
     
-    SIAlertViewController *viewController = [[SIAlertViewController alloc] initWithNibName:nil bundle:nil];
+    SLKAlertViewController *viewController = [[SLKAlertViewController alloc] initWithNibName:nil bundle:nil];
     viewController.alertView = self;
     
     if (!self.alertWindow) {
         UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         window.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         window.opaque = NO;
-        window.windowLevel = UIWindowLevelSIAlert;
+        window.windowLevel = UIWindowLevelSLKAlert;
         window.rootViewController = viewController;
         self.alertWindow = window;
     }
@@ -473,14 +469,14 @@ static SIAlertView *__si_alert_current_view;
         if (self.didShowHandler) {
             self.didShowHandler(self);
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewDidShowNotification object:self userInfo:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidShowNotification object:self userInfo:nil];
 
         [self addParallaxEffect];
         
-        [SIAlertView setAnimating:NO];
+        [SLKAlertView setAnimating:NO];
         
-        NSInteger index = [[SIAlertView sharedQueue] indexOfObject:self];
-        if (index < [SIAlertView sharedQueue].count - 1) {
+        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
+        if (index < [SLKAlertView sharedQueue].count - 1) {
             [self dismissAnimated:YES cleanup:NO]; // dismiss to show next alert view
         }
     }];
@@ -499,7 +495,7 @@ static SIAlertView *__si_alert_current_view;
         if (self.willDismissHandler) {
             self.willDismissHandler(self);
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewWillDismissNotification object:self userInfo:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillDismissNotification object:self userInfo:nil];
 
         [self removeParallaxEffect];
     }
@@ -509,25 +505,25 @@ static SIAlertView *__si_alert_current_view;
         
         [self teardown];
         
-        [SIAlertView setCurrentAlertView:nil];
+        [SLKAlertView setCurrentAlertView:nil];
         
-        SIAlertView *nextAlertView;
-        NSInteger index = [[SIAlertView sharedQueue] indexOfObject:self];
-        if (index != NSNotFound && index < [SIAlertView sharedQueue].count - 1) {
-            nextAlertView = [SIAlertView sharedQueue][index + 1];
+        SLKAlertView *nextAlertView;
+        NSInteger index = [[SLKAlertView sharedQueue] indexOfObject:self];
+        if (index != NSNotFound && index < [SLKAlertView sharedQueue].count - 1) {
+            nextAlertView = [SLKAlertView sharedQueue][index + 1];
         }
         
         if (cleanup) {
-            [[SIAlertView sharedQueue] removeObject:self];
+            [[SLKAlertView sharedQueue] removeObject:self];
         }
         
-        [SIAlertView setAnimating:NO];
+        [SLKAlertView setAnimating:NO];
         
         if (isVisible) {
             if (self.didDismissHandler) {
                 self.didDismissHandler(self);
             }
-            [[NSNotificationCenter defaultCenter] postNotificationName:SIAlertViewDidDismissNotification object:self userInfo:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidDismissNotification object:self userInfo:nil];
         }
         
         // check if we should show next alert
@@ -539,26 +535,26 @@ static SIAlertView *__si_alert_current_view;
             [nextAlertView show];
         } else {
             // show last alert view
-            if ([SIAlertView sharedQueue].count > 0) {
-                SIAlertView *alert = [[SIAlertView sharedQueue] lastObject];
+            if ([SLKAlertView sharedQueue].count > 0) {
+                SLKAlertView *alert = [[SLKAlertView sharedQueue] lastObject];
                 [alert show];
             }
         }
     };
     
     if (animated && isVisible) {
-        [SIAlertView setAnimating:YES];
+        [SLKAlertView setAnimating:YES];
         [self transitionOutCompletion:dismissComplete];
         
-        if ([SIAlertView sharedQueue].count == 1) {
-            [SIAlertView hideBackgroundAnimated:YES];
+        if ([SLKAlertView sharedQueue].count == 1) {
+            [SLKAlertView hideBackgroundAnimated:YES];
         }
         
     } else {
         dismissComplete();
         
-        if ([SIAlertView sharedQueue].count == 0) {
-            [SIAlertView hideBackgroundAnimated:YES];
+        if ([SLKAlertView sharedQueue].count == 0) {
+            [SLKAlertView hideBackgroundAnimated:YES];
         }
     }
     
@@ -580,7 +576,7 @@ static SIAlertView *__si_alert_current_view;
 - (void)transitionInCompletion:(void(^)(void))completion
 {
     switch (self.transitionStyle) {
-        case SIAlertViewTransitionStyleSlideFromBottom:
+        case SLKAlertViewTransitionStyleSlideFromBottom:
         {
             CGRect rect = self.containerView.frame;
             CGRect originalRect = rect;
@@ -597,7 +593,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleSlideFromTop:
+        case SLKAlertViewTransitionStyleSlideFromTop:
         {
             CGRect rect = self.containerView.frame;
             CGRect originalRect = rect;
@@ -614,7 +610,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleFade:
+        case SLKAlertViewTransitionStyleFade:
         {
             self.containerView.alpha = 0;
             [UIView animateWithDuration:0.3
@@ -628,7 +624,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleBounce:
+        case SLKAlertViewTransitionStyleBounce:
         {
             CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
             animation.values = @[@(0.01), @(1.2), @(0.9), @(1)];
@@ -640,7 +636,7 @@ static SIAlertView *__si_alert_current_view;
             [self.containerView.layer addAnimation:animation forKey:@"bouce"];
         }
             break;
-        case SIAlertViewTransitionStyleDropDown:
+        case SLKAlertViewTransitionStyleDropDown:
         {
             CGFloat y = self.containerView.center.y;
             CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position.y"];
@@ -661,7 +657,7 @@ static SIAlertView *__si_alert_current_view;
 - (void)transitionOutCompletion:(void(^)(void))completion
 {
     switch (self.transitionStyle) {
-        case SIAlertViewTransitionStyleSlideFromBottom:
+        case SLKAlertViewTransitionStyleSlideFromBottom:
         {
             CGRect rect = self.containerView.frame;
             rect.origin.y = self.bounds.size.height;
@@ -678,7 +674,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleSlideFromTop:
+        case SLKAlertViewTransitionStyleSlideFromTop:
         {
             CGRect rect = self.containerView.frame;
             rect.origin.y = -rect.size.height;
@@ -695,7 +691,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleFade:
+        case SLKAlertViewTransitionStyleFade:
         {
             [UIView animateWithDuration:0.25
                              animations:^{
@@ -708,7 +704,7 @@ static SIAlertView *__si_alert_current_view;
                              }];
         }
             break;
-        case SIAlertViewTransitionStyleBounce:
+        case SLKAlertViewTransitionStyleBounce:
         {
             CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
             animation.values = @[@(1), @(1.2), @(0.01)];
@@ -722,7 +718,7 @@ static SIAlertView *__si_alert_current_view;
             self.containerView.transform = CGAffineTransformMakeScale(0.01, 0.01);
         }
             break;
-        case SIAlertViewTransitionStyleDropDown:
+        case SLKAlertViewTransitionStyleDropDown:
         {
             CGPoint point = self.containerView.center;
             point.y += self.bounds.size.height;
@@ -952,7 +948,7 @@ static SIAlertView *__si_alert_current_view;
 
 - (UIButton *)buttonForItemIndex:(NSUInteger)index
 {
-    SIAlertItem *item = self.items[index];
+    SLKAlertItem *item = self.items[index];
 	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
 	button.tag = index;
 	button.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -961,15 +957,15 @@ static SIAlertView *__si_alert_current_view;
 	[button setTitle:item.title forState:UIControlStateNormal];
     
 	switch (item.type) {
-		case SIAlertViewButtonTypeCancel:
+		case SLKAlertViewButtonTypeCancel:
 			[button setTitleColor:self.cancelButtonColor forState:UIControlStateNormal];
             [button setTitleColor:[self.cancelButtonColor darkerColor] forState:UIControlStateHighlighted];
 			break;
-		case SIAlertViewButtonTypeDestructive:
+		case SLKAlertViewButtonTypeDestructive:
             [button setTitleColor:self.destructiveButtonColor forState:UIControlStateNormal];
             [button setTitleColor:[self.destructiveButtonColor darkerColor] forState:UIControlStateHighlighted];
 			break;
-		case SIAlertViewButtonTypeDefault:
+		case SLKAlertViewButtonTypeDefault:
 		default:
 			[button setTitleColor:self.buttonColor forState:UIControlStateNormal];
             [button setTitleColor:[self.buttonColor darkerColor] forState:UIControlStateHighlighted];
@@ -1010,8 +1006,8 @@ static SIAlertView *__si_alert_current_view;
 
 - (void)buttonAction:(UIButton *)button
 {
-	[SIAlertView setAnimating:YES]; // set this flag to YES in order to prevent showing another alert in action block
-    SIAlertItem *item = self.items[button.tag];
+	[SLKAlertView setAnimating:YES]; // set this flag to YES in order to prevent showing another alert in action block
+    SLKAlertItem *item = self.items[button.tag];
 	if (item.action) {
 		item.action(self);
 	}
@@ -1111,7 +1107,7 @@ static SIAlertView *__si_alert_current_view;
     }
     
     _buttonColor = buttonColor;
-    [self setColor:buttonColor toButtonsOfType:SIAlertViewButtonTypeDefault];
+    [self setColor:buttonColor toButtonsOfType:SLKAlertViewButtonTypeDefault];
 }
 
 - (void)setCancelButtonColor:(UIColor *)buttonColor
@@ -1121,7 +1117,7 @@ static SIAlertView *__si_alert_current_view;
     }
     
     _cancelButtonColor = buttonColor;
-    [self setColor:buttonColor toButtonsOfType:SIAlertViewButtonTypeCancel];
+    [self setColor:buttonColor toButtonsOfType:SLKAlertViewButtonTypeCancel];
 }
 
 - (void)setDestructiveButtonColor:(UIColor *)buttonColor
@@ -1131,13 +1127,13 @@ static SIAlertView *__si_alert_current_view;
     }
     
     _destructiveButtonColor = buttonColor;
-    [self setColor:buttonColor toButtonsOfType:SIAlertViewButtonTypeDestructive];
+    [self setColor:buttonColor toButtonsOfType:SLKAlertViewButtonTypeDestructive];
 }
 
-- (void)setColor:(UIColor *)color toButtonsOfType:(SIAlertViewButtonType)type
+- (void)setColor:(UIColor *)color toButtonsOfType:(SLKAlertViewButtonType)type
 {
     for (NSUInteger i = 0; i < self.items.count; i++) {
-        SIAlertItem *item = self.items[i];
+        SLKAlertItem *item = self.items[i];
         if(item.type == type) {
             UIButton *button = self.buttons[i];
             [button setTitleColor:color forState:UIControlStateNormal];

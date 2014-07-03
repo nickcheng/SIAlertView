@@ -1,10 +1,9 @@
 //
 //  UIWindow+SIUtils.h
-//  SIAlertView
+//  SLKAlertView
 //
 //  Created by Kevin Cao on 13-11-1.
 //  Copyright (c) 2013年 Sumi Interactive. All rights reserved.
-//
 
 #import <UIKit/UIKit.h>
 
