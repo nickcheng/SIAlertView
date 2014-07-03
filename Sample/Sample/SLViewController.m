@@ -22,9 +22,7 @@
 
 - (IBAction)showAlert:(id)sender
 {
-    NSLog(@"%s",__FUNCTION__);
-    
-    NSString *title = @"Allow new members to see the groups’s history?";
+    NSString *title = @"Allow new members to see the group’s history?";
     NSString *message = @"We can archive all current messages in the group to hide it from the new members you invite here. Current team members will still be able to access the history from a link to the archives.";
     
     [SIAlertView showWithTitle:title message:message
