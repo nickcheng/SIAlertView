@@ -309,8 +309,8 @@ static SLKAlertView *__si_alert_current_view;
 {
     SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title message:message];
     if (alert) {
-        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:accepted];
         if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SLKAlertViewButtonTypeCancel handler:cancelled];
+        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:accepted];
         [alert show];
     }
     return alert;
@@ -351,7 +351,7 @@ static SLKAlertView *__si_alert_current_view;
 {
     if (!__si_alert_background_window) {
         __si_alert_background_window = [[SLKAlertBackgroundWindow alloc] initWithFrame:[UIScreen mainScreen].bounds
-                                                                             andStyle:[SLKAlertView currentAlertView].backgroundStyle];
+                                                                              andStyle:[SLKAlertView currentAlertView].backgroundStyle];
         [__si_alert_background_window makeKeyAndVisible];
         __si_alert_background_window.alpha = 0;
         [UIView animateWithDuration:0.3
@@ -634,12 +634,12 @@ static SLKAlertView *__si_alert_current_view;
     }
     
     self.oldKeyWindow = [[UIApplication sharedApplication] keyWindow];
-
+    
     if ([self.oldKeyWindow respondsToSelector:@selector(setTintAdjustmentMode:)]) {
         self.oldTintAdjustmentMode = self.oldKeyWindow.tintAdjustmentMode;
         self.oldKeyWindow.tintAdjustmentMode = UIViewTintAdjustmentModeDimmed;
     }
-
+    
     if (![[SLKAlertView sharedQueue] containsObject:self]) {
         [[SLKAlertView sharedQueue] addObject:self];
     }
@@ -687,7 +687,7 @@ static SLKAlertView *__si_alert_current_view;
             self.didShowHandler(self);
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewDidShowNotification object:self userInfo:nil];
-
+        
         [self addParallaxEffect];
         
         [SLKAlertView setAnimating:NO];
@@ -713,7 +713,7 @@ static SLKAlertView *__si_alert_current_view;
             self.willDismissHandler(self);
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:SLKAlertViewWillDismissNotification object:self userInfo:nil];
-
+        
         [self removeParallaxEffect];
     }
     
@@ -779,11 +779,11 @@ static SLKAlertView *__si_alert_current_view;
     }
     
     UIWindow *window = self.oldKeyWindow;
-
+    
     if ([window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
         window.tintAdjustmentMode = self.oldTintAdjustmentMode;
     }
-
+    
     if (!window) {
         window = [UIApplication sharedApplication].windows[0];
     }
@@ -1037,7 +1037,7 @@ static SLKAlertView *__si_alert_current_view;
             
             UIButton *button = self.buttons[0];
             button.frame = CGRectMake(-BUTTON_BORDER_WIDTH, y, width, BUTTON_HEIGHT);
-
+            
             button = self.buttons[1];
             button.frame = CGRectMake(width-(BUTTON_BORDER_WIDTH*2), y, width+BUTTON_BORDER_WIDTH, BUTTON_HEIGHT);
         }
@@ -1170,6 +1170,10 @@ static SLKAlertView *__si_alert_current_view;
 
 - (void)setupButtons
 {
+    if (self.items.count == 0) {
+        [self addButtonWithTitle:@"OK" type:SLKAlertViewButtonTypeCancel handler:NULL];
+    }
+    
     self.buttons = [[NSMutableArray alloc] initWithCapacity:self.items.count];
     
     for (NSUInteger i = 0; i < self.items.count; i++)

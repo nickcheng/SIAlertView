@@ -25,12 +25,11 @@ typedef NS_ENUM(NSInteger, SLKAlertViewBackgroundStyle) {
 };
 
 typedef NS_ENUM(NSInteger, SLKAlertViewTransitionStyle) {
-    SLKAlertViewTransitionStyleDropDown,
     SLKAlertViewTransitionStyleSlideFromBottom,
+    SLKAlertViewTransitionStyleDropDown,
     SLKAlertViewTransitionStyleSlideFromTop,
     SLKAlertViewTransitionStyleFade,
     SLKAlertViewTransitionStyleBounce,
-    
 };
 
 @class SLKAlertView;
@@ -123,7 +122,7 @@ typedef void(^SLKAlertViewBlock)(SLKAlertView *alertView);
 /**
  Dismisses the receiver, optionally with animation.
  
- @param animated YES if the alert should be dismissed with animation. 
+ @param animated YES if the alert should be dismissed with animation.
  */
 - (void)dismissAnimated:(BOOL)animated;
 
