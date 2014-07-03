@@ -65,9 +65,9 @@ typedef void(^SLKAlertViewHandler)(SLKAlertView *alertView);
 
 - (instancetype)initWithTitle:(NSString *)title andMessage:(NSString *)message;
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler;
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewHandler)cancelled;
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler acceptButtonTitle:(NSString *)acceptTitle acceptHandler:(SLKAlertViewHandler)acceptHandler;
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewHandler)accepted didCancel:(SLKAlertViewHandler)cancelled;
 
 - (void)show;
 - (void)dismissAnimated:(BOOL)animated;

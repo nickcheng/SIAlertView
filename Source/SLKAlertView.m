@@ -260,21 +260,22 @@ static SLKAlertView *__si_alert_current_view;
 	return self;
 }
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle didCancel:(SLKAlertViewHandler)cancelled
 {
-    return [self showWithTitle:title message:message cancelButtonTitle:cancelTitle cancelHandler:cancelHandler acceptButtonTitle:nil acceptHandler:NULL];
+    return [self showWithTitle:title message:message acceptButtonTitle:nil cancelButtonTitle:cancelTitle didAccept:NULL didCancel:cancelled];
 }
 
-+ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelTitle cancelHandler:(SLKAlertViewHandler)cancelHandler acceptButtonTitle:(NSString *)acceptTitle acceptHandler:(SLKAlertViewHandler)acceptHandler
++ (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewHandler)accepted didCancel:(SLKAlertViewHandler)cancelled
 {
     SLKAlertView *alert = [[SLKAlertView alloc] initWithTitle:title andMessage:message];
     if (alert) {
-        if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SLKAlertViewButtonTypeCancel handler:cancelHandler];
-        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:acceptHandler];
+        if (acceptTitle) [alert addButtonWithTitle:acceptTitle type:SLKAlertViewButtonTypeDefault handler:accepted];
+        if (cancelTitle) [alert addButtonWithTitle:cancelTitle type:SLKAlertViewButtonTypeCancel handler:cancelled];
         [alert show];
     }
     return alert;
 }
+
 
 #pragma mark - Class methods
 
@@ -434,7 +435,7 @@ static SLKAlertView *__si_alert_current_view;
     }
     
     if ([SLKAlertView currentAlertView].isVisible) {
-        return;
+        return; // wait for next turn
     }
     
     if (self.willShowHandler) {
