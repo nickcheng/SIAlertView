@@ -5,34 +5,34 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>1DC754B6-26AC-46E0-B57E-F6DCC8CE2295</string>
+	<string>782C61C3-8EC9-465B-94FC-B20D80BDAF3C</string>
 	<key>IDESourceControlProjectName</key>
 	<string>Sample</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>1EE19127-7F15-4095-A45D-7D481FB08953</key>
-		<string>https://github.com/Sumi-Interactive/SIAlertView.git</string>
+		<key>A5F18C0C-A796-4499-8373-B0C43D8790A7</key>
+		<string>https://github.com/DZNLabs/SIAlertView.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>Sample/Sample.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>1EE19127-7F15-4095-A45D-7D481FB08953</key>
+		<key>A5F18C0C-A796-4499-8373-B0C43D8790A7</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/Sumi-Interactive/SIAlertView.git</string>
+	<string>https://github.com/DZNLabs/SIAlertView.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>1EE19127-7F15-4095-A45D-7D481FB08953</string>
+	<string>A5F18C0C-A796-4499-8373-B0C43D8790A7</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>1EE19127-7F15-4095-A45D-7D481FB08953</string>
+			<string>A5F18C0C-A796-4499-8373-B0C43D8790A7</string>
 			<key>IDESourceControlWCCName</key>
 			<string>SIAlertView</string>
 		</dict>

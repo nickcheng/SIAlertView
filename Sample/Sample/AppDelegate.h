@@ -1,5 +1,5 @@
 //
-//  SLAppDelegate.h
+//  AppDelegate.h
 //  Sample
 //
 //  Created by Ignacio Romero Z. on 7/2/14.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SLAppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 

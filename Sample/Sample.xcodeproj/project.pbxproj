@@ -12,10 +12,10 @@
 		4F2F03A71964E846004A6EEB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F2F03A61964E846004A6EEB /* UIKit.framework */; };
 		4F2F03AD1964E846004A6EEB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03AB1964E846004A6EEB /* InfoPlist.strings */; };
 		4F2F03AF1964E846004A6EEB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03AE1964E846004A6EEB /* main.m */; };
-		4F2F03B31964E846004A6EEB /* SLAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03B21964E846004A6EEB /* SLAppDelegate.m */; };
+		4F2F03B31964E846004A6EEB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03B21964E846004A6EEB /* AppDelegate.m */; };
 		4F2F03B61964E846004A6EEB /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03B41964E846004A6EEB /* Main_iPhone.storyboard */; };
 		4F2F03B91964E846004A6EEB /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03B71964E846004A6EEB /* Main_iPad.storyboard */; };
-		4F2F03BC1964E846004A6EEB /* SLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03BB1964E846004A6EEB /* SLViewController.m */; };
+		4F2F03BC1964E846004A6EEB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03BB1964E846004A6EEB /* ViewController.m */; };
 		4F2F03BE1964E846004A6EEB /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F2F03BD1964E846004A6EEB /* Images.xcassets */; };
 		4F2F03F81964EBB9004A6EEB /* UIColor+Slack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03DF1964EBB9004A6EEB /* UIColor+Slack.m */; };
 		4F2F03F91964EBB9004A6EEB /* UIFont+Slack.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F2F03E11964EBB9004A6EEB /* UIFont+Slack.m */; };
@@ -51,12 +51,12 @@
 		4F2F03AC1964E846004A6EEB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4F2F03AE1964E846004A6EEB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4F2F03B01964E846004A6EEB /* Sample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Sample-Prefix.pch"; sourceTree = "<group>"; };
-		4F2F03B11964E846004A6EEB /* SLAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SLAppDelegate.h; sourceTree = "<group>"; };
-		4F2F03B21964E846004A6EEB /* SLAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SLAppDelegate.m; sourceTree = "<group>"; };
+		4F2F03B11964E846004A6EEB /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		4F2F03B21964E846004A6EEB /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		4F2F03B51964E846004A6EEB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
 		4F2F03B81964E846004A6EEB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
-		4F2F03BA1964E846004A6EEB /* SLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SLViewController.h; sourceTree = "<group>"; };
-		4F2F03BB1964E846004A6EEB /* SLViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SLViewController.m; sourceTree = "<group>"; };
+		4F2F03BA1964E846004A6EEB /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		4F2F03BB1964E846004A6EEB /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		4F2F03BD1964E846004A6EEB /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		4F2F03C41964E846004A6EEB /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4F2F03DC1964EBB9004A6EEB /* SLAppearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SLAppearance.h; sourceTree = "<group>"; };
@@ -137,10 +137,10 @@
 		4F2F03A81964E846004A6EEB /* Sample */ = {
 			isa = PBXGroup;
 			children = (
-				4F2F03B11964E846004A6EEB /* SLAppDelegate.h */,
-				4F2F03B21964E846004A6EEB /* SLAppDelegate.m */,
-				4F2F03BA1964E846004A6EEB /* SLViewController.h */,
-				4F2F03BB1964E846004A6EEB /* SLViewController.m */,
+				4F2F03B11964E846004A6EEB /* AppDelegate.h */,
+				4F2F03B21964E846004A6EEB /* AppDelegate.m */,
+				4F2F03BA1964E846004A6EEB /* ViewController.h */,
+				4F2F03BB1964E846004A6EEB /* ViewController.m */,
 				4F2F03DA1964EBB9004A6EEB /* Slack */,
 				4F2F040D1964EC4B004A6EEB /* SIAlert */,
 				4F2F03A91964E846004A6EEB /* Supporting Files */,
@@ -352,8 +352,8 @@
 				4F2F03F81964EBB9004A6EEB /* UIColor+Slack.m in Sources */,
 				4F2F03F91964EBB9004A6EEB /* UIFont+Slack.m in Sources */,
 				4F2F04141964EC4B004A6EEB /* SLKAlertView.m in Sources */,
-				4F2F03BC1964E846004A6EEB /* SLViewController.m in Sources */,
-				4F2F03B31964E846004A6EEB /* SLAppDelegate.m in Sources */,
+				4F2F03BC1964E846004A6EEB /* ViewController.m in Sources */,
+				4F2F03B31964E846004A6EEB /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,22 +14,23 @@ extern NSString *const SLKAlertViewWillDismissNotification;
 extern NSString *const SLKAlertViewDidDismissNotification;
 
 typedef NS_ENUM(NSInteger, SLKAlertViewButtonType) {
-    SLKAlertViewButtonTypeDefault = 0,
+    SLKAlertViewButtonTypeDefault,
     SLKAlertViewButtonTypeDestructive,
     SLKAlertViewButtonTypeCancel
 };
 
 typedef NS_ENUM(NSInteger, SLKAlertViewBackgroundStyle) {
-    SLKAlertViewBackgroundStyleSolid = 0,
+    SLKAlertViewBackgroundStyleSolid,
     SLKAlertViewBackgroundStyleGradient,
 };
 
 typedef NS_ENUM(NSInteger, SLKAlertViewTransitionStyle) {
-    SLKAlertViewTransitionStyleSlideFromBottom = 0,
+    SLKAlertViewTransitionStyleDropDown,
+    SLKAlertViewTransitionStyleSlideFromBottom,
     SLKAlertViewTransitionStyleSlideFromTop,
     SLKAlertViewTransitionStyleFade,
     SLKAlertViewTransitionStyleBounce,
-    SLKAlertViewTransitionStyleDropDown
+    
 };
 
 @class SLKAlertView;

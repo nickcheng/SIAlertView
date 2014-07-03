@@ -1,5 +1,5 @@
 //
-//  SLViewController.h
+//  ViewController.h
 //  Sample
 //
 //  Created by Ignacio Romero Z. on 7/2/14.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SLViewController : UIViewController
+@interface ViewController : UIViewController
 
 - (IBAction)showAlert:(id)sender;
 

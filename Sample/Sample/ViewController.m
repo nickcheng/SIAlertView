@@ -1,19 +1,19 @@
 //
-//  SLViewController.m
+//  ViewController.m
 //  Sample
 //
 //  Created by Ignacio Romero Z. on 7/2/14.
 //  Copyright (c) 2014 Tiny Speck, Inc. All rights reserved.
 //
 
-#import "SLViewController.h"
+#import "ViewController.h"
 #import "SLKAlertView.h"
 
-@interface SLViewController ()
+@interface ViewController ()
 @end
 
 
-@implementation SLViewController
+@implementation ViewController
 
 + (void)initialize
 {
