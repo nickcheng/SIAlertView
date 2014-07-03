@@ -1,0 +1,5 @@
+platform :ios, '7.0'
+
+#pod 'SIAlertView', :path => '../'
+
+pod 'DZNCategories/Cocoa', '1.1.1'
