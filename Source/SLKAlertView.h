@@ -48,7 +48,7 @@ typedef void(^SLKAlertViewBlock)(SLKAlertView *alertView);
 @property (nonatomic, strong) UIColor *titleColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
 /** The alert message color. Default is #8A8B8B */
 @property (nonatomic, strong) UIColor *messageColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
-/** The alert title font. Default is Lato-Bold 20pts. */
+/** The alert title font. Default is Lato-Bold 18pts. */
 @property (nonatomic, strong) UIFont *titleFont NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
 /** The alert message font. Default is Lato 14pts. */
 @property (nonatomic, strong) UIFont *messageFont NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
@@ -60,8 +60,9 @@ typedef void(^SLKAlertViewBlock)(SLKAlertView *alertView);
 @property (nonatomic, strong) UIColor *cancelButtonColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
 /** The alert destructive button color. Default is #EB4D5B */
 @property (nonatomic, strong) UIColor *destructiveButtonColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
-/** The alert corner radius. Default is 10.0 */
+/** The alert corner radius. Default is 3.0 */
 @property (nonatomic, assign) CGFloat cornerRadius NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (nonatomic, assign) CGFloat viewAlpha NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
 
 /** The alert transition style. Default is SLKAlertViewTransitionStyleSlideFromBottom */
 @property (nonatomic, assign) SLKAlertViewTransitionStyle transitionStyle;
@@ -113,6 +114,16 @@ typedef void(^SLKAlertViewBlock)(SLKAlertView *alertView);
  @paran cancelled A block object to be triggered when the button is tapped.
  */
 + (instancetype)showWithTitle:(NSString *)title message:(NSString *)message acceptButtonTitle:(NSString *)acceptTitle cancelButtonTitle:(NSString *)cancelTitle didAccept:(SLKAlertViewBlock)accepted didCancel:(SLKAlertViewBlock)cancelled;
+
+
++ (instancetype)showWithTitle:(NSString *)title
+                      message:(NSString *)message
+                 buttonTitle1:(NSString *)title1
+                 buttonTitle2:(NSString *)title2
+                 buttonTitle3:(NSString *)title3
+               buttonHandler1:(SLKAlertViewBlock)handler1
+               buttonHandler2:(SLKAlertViewBlock)handler2
+               buttonHandler3:(SLKAlertViewBlock)handler3;
 
 /**
  Displays the receiver using animation.
