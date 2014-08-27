@@ -7,11 +7,10 @@
 //  Copyright (c) 2013年 Sumi Interactive. All rights reserved.
 
 #import "SLKAlertView.h"
-#import "SLAppearance.h"
+//#import "SLAppearance.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import "UIColor+Hex.h"
-#import "UIColor+Effect.h"
+#import "UIColor+SAMAdditions.h"
 
 #define MESSAGE_MIN_LINE_COUNT 3
 #define MESSAGE_MAX_LINE_COUNT 10
@@ -257,14 +256,14 @@ static SLKAlertView *__si_alert_current_view;
 
   SLKAlertView *appearance = [self appearance];
   appearance.viewBackgroundColor    = [UIColor whiteColor];
-  appearance.titleColor             = [UIColor colorFromHex:@"464646"];
-  appearance.messageColor           = [UIColor colorFromHex:@"464646"];
-  appearance.titleFont              = [UIFont slackBoldFontOfSize:18.0];
-  appearance.messageFont            = [UIFont slackFontOfSize:14.0];
-  appearance.buttonFont             = [UIFont slackFontOfSize:18.0];
-  appearance.buttonColor            = [UIColor colorFromHex:@"464646"];
-  appearance.cancelButtonColor      = [UIColor colorFromHex:@"464646"];
-  appearance.destructiveButtonColor = [UIColor destructiveColor];
+  appearance.titleColor             = [UIColor sam_colorWithHex:@"464646"];
+  appearance.messageColor           = [UIColor sam_colorWithHex:@"464646"];
+  appearance.titleFont              = [UIFont fontWithName:@"AvenirNext-Bold" size:18.f];
+  appearance.messageFont            = [UIFont fontWithName:@"AvenirNext-Regular" size:14.f];
+  appearance.buttonFont             = [UIFont fontWithName:@"AvenirNext-Regular" size:18.f];
+  appearance.buttonColor            = [UIColor sam_colorWithHex:@"464646"];
+  appearance.cancelButtonColor      = [UIColor sam_colorWithHex:@"464646"];
+  appearance.destructiveButtonColor = [UIColor sam_colorWithHex:@"EB4D5B"];
   appearance.cornerRadius           = 3.0;
   appearance.viewAlpha              = .7f;
 }
@@ -418,23 +417,23 @@ static SLKAlertView *__si_alert_current_view;
   switch (item.type) {
   case SLKAlertViewButtonTypeCancel:
     [button setTitleColor:self.cancelButtonColor forState:UIControlStateNormal];
-    [button setTitleColor:[self.cancelButtonColor darkerColor] forState:UIControlStateHighlighted];
+    [button setTitleColor:[self.cancelButtonColor sam_darkerColor] forState:UIControlStateHighlighted];
     break;
   case SLKAlertViewButtonTypeDestructive:
     [button setTitleColor:self.destructiveButtonColor forState:UIControlStateNormal];
-    [button setTitleColor:[self.destructiveButtonColor darkerColor] forState:UIControlStateHighlighted];
+    [button setTitleColor:[self.destructiveButtonColor sam_darkerColor] forState:UIControlStateHighlighted];
     break;
   case SLKAlertViewButtonTypeDefault:
   default:
     [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
-    [button setTitleColor:[self.buttonColor darkerColor] forState:UIControlStateHighlighted];
+    [button setTitleColor:[self.buttonColor sam_darkerColor] forState:UIControlStateHighlighted];
     break;
   }
 
   [button setBackgroundImage:[self backgroundImageForColor:[UIColor colorWithWhite:0.0 alpha:0.0625]]
                     forState:UIControlStateHighlighted];
 
-  button.layer.borderColor = [UIColor colorFromHex:@"464646"].CGColor;
+  button.layer.borderColor = [UIColor sam_colorWithHex:@"464646"].CGColor;
   button.layer.borderWidth = BUTTON_BORDER_WIDTH;
 
   [button addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
@@ -607,7 +606,7 @@ static SLKAlertView *__si_alert_current_view;
         if(item.type == type) {
             UIButton *button = self.buttons[i];
             [button setTitleColor:color forState:UIControlStateNormal];
-            [button setTitleColor:[color darkerColor] forState:UIControlStateHighlighted];
+            [button setTitleColor:[color sam_darkerColor] forState:UIControlStateHighlighted];
         }
     }
 }
