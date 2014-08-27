@@ -265,7 +265,7 @@ static SLKAlertView *__si_alert_current_view;
   appearance.cancelButtonColor      = [UIColor sam_colorWithHex:@"464646"];
   appearance.destructiveButtonColor = [UIColor sam_colorWithHex:@"EB4D5B"];
   appearance.cornerRadius           = 3.0;
-  appearance.viewAlpha              = .7f;
+  appearance.viewAlpha              = .9f;
   appearance.transitionStyle = SLKAlertViewTransitionStyleBounce;
 }
 
@@ -813,7 +813,7 @@ static SLKAlertView *__si_alert_current_view;
       animation.values          = @[@(0.01), @(1.2), @(0.9), @(1)];
       animation.keyTimes        = @[@(0), @(0.4), @(0.6), @(1)];
       animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-      animation.duration        = 0.2;
+      animation.duration        = 0.3;
       animation.delegate        = self;
       [animation setValue:completion forKey:@"handler"];
       [self.containerView.layer addAnimation:animation forKey:@"bouce"];
@@ -895,7 +895,7 @@ static SLKAlertView *__si_alert_current_view;
       animation.values          = @[@(1), @(1.2), @(0.01)];
       animation.keyTimes        = @[@(0), @(0.4), @(1)];
       animation.timingFunctions = @[[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut], [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-      animation.duration        = 0.2;
+      animation.duration        = 0.3;
       animation.delegate        = self;
       [animation setValue:completion forKey:@"handler"];
       [self.containerView.layer addAnimation:animation forKey:@"bounce"];
