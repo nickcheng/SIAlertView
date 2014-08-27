@@ -1076,7 +1076,7 @@ static SLKAlertView *__si_alert_current_view;
 
     return roundf(MAX(minHeight, size.height+GAP));
   }
-  return 0.0;
+  return CONTENT_PADDING_BOTTOM;
 }
 
 #pragma mark - Setup

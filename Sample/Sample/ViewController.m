@@ -45,6 +45,10 @@
   } buttonHandler3:^(SLKAlertView *alertView) {
     NSLog(@"Title 3");
   }];
+  
+//  [SLKAlertView showWithTitle:@"Haha" message:@"" cancelButtonTitle:@"OK" didCancel:^(SLKAlertView *alertView) {
+//    NSLog(@"hahaha");
+//  }];
 }
 
 - (void)showAnotherAlert {
